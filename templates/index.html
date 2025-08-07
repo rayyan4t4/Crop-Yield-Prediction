@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriPredict | Crop Yield Forecast</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+                        url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        
+        .card-gradient {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px -10px rgba(6, 78, 59, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .input-focus {
+            transition: all 0.3s ease;
+        }
+        
+        .input-focus:focus {
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+            border-color: #10b981;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #10b981, #059669);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px -5px rgba(5, 150, 105, 0.4);
+        }
+        
+        .result-card {
+            background: linear-gradient(to right, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tooltip {
+            position: relative;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #064e3b;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+        }
+        
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #064e3b transparent transparent transparent;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4 md:p-8">
+    <div class="w-full max-w-5xl">
+        <div class="card-gradient rounded-2xl overflow-hidden">
+            <!-- Header Section -->
+            <div class="bg-emerald-600/90 p-6 text-white backdrop-blur-sm">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="flex items-center mb-4 md:mb-0">
+                        <i class="fas fa-leaf text-3xl mr-3"></i>
+                        <h1 class="text-2xl md:text-3xl font-bold">AgriPredict By Rayyan</h1>
+                    </div>
+                    <div class="text-sm md:text-base bg-emerald-700 px-4 py-2 rounded-full">
+                        <i class="fas fa-chart-line mr-2"></i> Smart Crop Yield Forecasting
+                    </div>
+                </div>
+                <p class="mt-3 text-emerald-100 text-center md:text-left">
+                    Enter your agricultural data below to receive an accurate yield prediction
+                </p>
+            </div>
+            
+            <!-- Main Form Section -->
+            <div class="p-6 md:p-8">
+                <form action="/predict" method="post" onsubmit="return validateForm()" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <!-- Date Field -->
+                        <div>
+                            <label for="date" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                <i class="fas fa-calendar-day text-emerald-600 mr-2"></i> Date
+                            </label>
+                            <input type="date" id="date" name="date" required 
+                                class="w-full p-3 rounded-lg border border-gray-300 input-focus">
+                        </div>
+                        
+                        <!-- Crop Type Field -->
+                        <div>
+                            <label for="crop_type" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                <i class="fas fa-seedling text-emerald-600 mr-2"></i> Crop Type
+                            </label>
+                            <div class="relative">
+                                <input type="text" id="crop_type" name="crop_type" list="cropTypes" placeholder="Select crop" required
+                                    class="w-full p-3 rounded-lg border border-gray-300 input-focus">
+                                <datalist id="cropTypes">
+                                    <option value="Wheat">
+                                    <option value="Corn">
+                                    <option value="Rice">
+                                    <option value="Barley">
+                                    <option value="Soybean">
+                                    <option value="Cotton">
+                                    <option value="Sugarcane">
+                                    <option value="Tomato">
+                                    <option value="Potato">
+                                    <option value="Sunflower">
+                                </datalist>
+                            </div>
+                        </div>
+                        
+                        <!-- Soil Type Field -->
+                        <div>
+                            <label for="soil_type" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                <i class="fas fa-mountain text-emerald-600 mr-2"></i> Soil Type
+                            </label>
+                            <div class="relative">
+                                <input type="text" id="soil_type" name="soil_type" list="soilTypes" placeholder="Select soil type" required
+                                    class="w-full p-3 rounded-lg border border-gray-300 input-focus">
+                                <datalist id="soilTypes">
+                                    <option value="Peaty">
+                                    <option value="Loamy">
+                                    <option value="Sandy">
+                                    <option value="Saline">
+                                    <option value="Clay">
+                                </datalist>
+                            </div>
+                        </div>
+                        
+                        <!-- Soil pH Field -->
+                        <div class="tooltip">
+                            <label for="soil_ph" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                <i class="fas fa-flask text-emerald-600 mr-2"></i> Soil pH
+                            </label>
+                            <input type="number" step="0.01" id="soil_ph" name="soil_ph" placeholder="0.0 - 7.5 optimal" required
+                                class="w-full p-3 rounded-lg border border-gray-300 input-focus">
+                            <span class="tooltip-text">Most crops prefer slightly acidic to neutral soil (pH 0.0-7.5)</span>
+                        </div>
+                        
+                        <!-- Temperature Field -->
+                        <div>
+                            <label for="temperature" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                <i class="fas fa-temperature-high text-emerald-600 mr-2"></i> Temperature (°C)
+                            </label>
+                            <input type="number" step="0.1" id="temperature" name="temperature" placeholder="e.g. 25.5" required
+                                class="w-full p-3 rounded-lg border border-gray-300 input-focus">
+                        </div>
+                        
+                        <!-- Humidity Field -->
+                        <div>
+                            <label for="humidity" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                <i class="fas fa-tint text-emerald-600 mr-2"></i> Humidity (%)
+                            </label>
+                            <input type="number" step="0.1" id="humidity" name="humidity" placeholder="e.g. 65.0" required
+                                class="w-full p-3 rounded-lg border border-gray-300 input-focus">
+                        </div>
+                        
+                        <!-- Wind Speed Field -->
+                        <div>
+                            <label for="wind_speed" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                <i class="fas fa-wind text-emerald-600 mr-2"></i> Wind Speed (km/h)
+                            </label>
+                            <input type="number" step="0.1" id="wind_speed" name="wind_speed" placeholder="e.g. 12.3" required
+                                class="w-full p-3 rounded-lg border border-gray-300 input-focus">
+                        </div>
+                        
+                        <!-- NPK Fields -->
+                        <div class="tooltip">
+                            <label for="n" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                <i class="fas fa-atom text-emerald-600 mr-2"></i> Nitrogen (N) ppm
+                            </label>
+                            <input type="number" id="n" name="n" placeholder="e.g. 25" required
+                                class="w-full p-3 rounded-lg border border-gray-300 input-focus">
+                            <span class="tooltip-text">Nitrogen promotes leaf growth and green color</span>
+                        </div>
+                        
+                        <div class="tooltip">
+                            <label for="p" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                <i class="fas fa-atom text-emerald-600 mr-2"></i> Phosphorus (P) ppm
+                            </label>
+                            <input type="number" id="p" name="p" placeholder="e.g. 15" required
+                                class="w-full p-3 rounded-lg border border-gray-300 input-focus">
+                            <span class="tooltip-text">Phosphorus supports root development and flowering</span>
+                        </div>
+                        
+                        <div class="tooltip">
+                            <label for="k" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                <i class="fas fa-atom text-emerald-600 mr-2"></i> Potassium (K) ppm
+                            </label>
+                            <input type="number" id="k" name="k" placeholder="e.g. 20" required
+                                class="w-full p-3 rounded-lg border border-gray-300 input-focus">
+                            <span class="tooltip-text">Potassium improves disease resistance and fruit quality</span>
+                        </div>
+                        
+                        <!-- Soil Quality Field -->
+                        <div>
+                            <label for="soil_quality" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                <i class="fas fa-award text-emerald-600 mr-2"></i> Soil Quality (1-100)
+                            </label>
+                            <input type="number" min="1" max="10" id="soil_quality" name="soil_quality" placeholder="Rate 1 to 100" required
+                                class="w-full p-3 rounded-lg border border-gray-300 input-focus">
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="pt-4">
+                        <button type="submit" 
+                            class="btn-primary w-full py-3 px-6 text-white font-semibold rounded-lg flex items-center justify-center">
+                            <i class="fas fa-calculator mr-2"></i> Calculate Yield Prediction
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Result Display -->
+                {% if result is not none %}
+                <div class="result-card mt-8 p-6 rounded-lg border border-emerald-200/50 bg-white/80 backdrop-blur-sm">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="bg-emerald-100 p-3 rounded-full mb-3">
+                            <i class="fas fa-chart-pie text-emerald-600 text-2xl"></i>
+                        </div>
+                        <h2 class="text-xl md:text-2xl font-bold text-emerald-800 mb-2">
+                            Predicted Crop Yield
+                        </h2>
+                        <p class="text-3xl font-extrabold text-emerald-700 mb-3">
+                            {{ result }} <span class="text-lg font-medium">tons/hectare</span>
+                        </p>
+                        <div class="flex space-x-4 text-sm">
+                            <div class="bg-emerald-50 px-3 py-1 rounded-full text-emerald-700">
+                                <i class="fas fa-calendar-check mr-1"></i> {{ date }}
+                            </div>
+                            <div class="bg-emerald-50 px-3 py-1 rounded-full text-emerald-700">
+                                <i class="fas fa-seedling mr-1"></i> {{ crop_type }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center mt-6 text-sm text-gray-500">
+            <p>AgriPredict &copy; 2023 | Precision Agriculture Analytics</p>
+        </div>
+    </div>
+
+    <script>
+        function validateForm() {
+            const validCropTypes = ["Wheat", "Corn", "Rice", "Barley", "Soybean", "Cotton", "Sugarcane", "Tomato", "Potato", "Sunflower"];
+            const validSoilTypes = ["Peaty", "Loamy", "Sandy", "Saline", "Clay"];
+
+            const cropInput = document.getElementById('crop_type').value.trim();
+            const soilInput = document.getElementById('soil_type').value.trim();
+            const soilQuality = document.getElementById('soil_quality').value;
+
+            if (!validCropTypes.includes(cropInput)) {
+                alert("Please select a valid crop type from the suggestions.");
+                return false;
+            }
+
+            if (!validSoilTypes.includes(soilInput)) {
+                alert("Please select a valid soil type from the suggestions.");
+                return false;
+            }
+
+            if (soilQuality < 1 || soilQuality > 10) {
+                alert("Soil Quality must be between 1 and 10");
+                return false;
+            }
+
+            return true;
+        }
+        
+        // Set today's date as default
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+            
+            // Add input validation for numeric fields
+            const numericInputs = document.querySelectorAll('input[type="number"]');
+            numericInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    if (this.value && isNaN(this.value)) {
+                        this.value = '';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
